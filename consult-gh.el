@@ -3413,9 +3413,11 @@ users))
 "Get the character for consult async split STYLE.
 
 STYLE defaults to `consult-async-split-style'."
-(let ((style (or style consult-async-split-style 'none)))
-  (or (char-to-string (plist-get (alist-get style consult-async-split-styles-alist) :initial))
-      (char-to-string (plist-get (alist-get style consult-async-split-styles-alist) :separator))
+(let* ((style (or style consult-async-split-style 'none))
+       (spec (alist-get style consult-async-split-styles-alist))
+       (char (or (plist-get spec :initial) (plist-get spec :separator))))
+    (if char
+        (char-to-string char)
       "")))
 
 (defun consult-gh--get-license-list ()
@@ -8472,7 +8474,9 @@ REPO and REF."
               (goto-char (point-min))
               (save-match-data
                 (save-excursion
-                  (re-search-forward "\\(?:\\(?:\n\\|\n\\)\n\\)" nil t)
+                  (re-search-forward "\\(?:\\(?:\n\\|
+\n
+\\)\n\\)" nil t)
                   (let* ((header (buffer-substring-no-properties (point-min) (point)))
                          (body (buffer-substring-no-properties (point) (point-max)))
                          (link-next (if (string-match ".*Link: .*<\\(?1:http.*\\)>.*?; rel=\"next\".*$" header)
